@@ -114,12 +114,6 @@ steps:
 
   - script: |
       set -e
-      service xvfb start
-    displayName: Start xvfb
-    condition: and(succeeded(), eq(variables['VSCODE_ARCH'], 'x64'), eq(variables['VSCODE_STEP_ON_IT'], 'false'))
-
-  - script: |
-      set -e
       DISPLAY=:10 ./scripts/test.sh --build --tfs "Unit Tests"
     displayName: Run unit tests (Electron)
     condition: and(succeeded(), eq(variables['VSCODE_ARCH'], 'x64'), eq(variables['VSCODE_STEP_ON_IT'], 'false'))
