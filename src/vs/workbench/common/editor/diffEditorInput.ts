@@ -14,6 +14,8 @@ import { ILabelService } from 'vs/platform/label/common/label';
 import { IFileService } from 'vs/platform/files/common/files';
 import { URI } from 'vs/base/common/uri';
 import { withNullAsUndefined } from 'vs/base/common/types';
+import { shorten } from 'vs/base/common/labels';
+import { sep } from 'vs/base/common/path';
 
 /**
  * The base editor input for the diff editor. It is made up of two editor inputs, the original version
@@ -48,11 +50,27 @@ export class DiffEditorInput extends SideBySideEditorInput {
 			// relative path in case both sides have different parents and we
 			// compare file resources.
 			const fileResources = this.asFileResources();
+			let labels: string[];
 			if (fileResources && dirname(fileResources.original).path !== dirname(fileResources.modified).path) {
-				return `${this.labelService.getUriLabel(fileResources.original, { relative: true })} ↔ ${this.labelService.getUriLabel(fileResources.modified, { relative: true })}`;
+				const shortenedDirs: string[] = shorten([
+					this.labelService.getUriDirLabel(fileResources.original),
+					this.labelService.getUriDirLabel(fileResources.modified)
+				]);
+
+				labels = [
+					shortenedDirs[0] + sep +
+					this.labelService.getUriBasenameLabel(fileResources.original),
+					shortenedDirs[1] + sep +
+					this.labelService.getUriBasenameLabel(fileResources.modified)
+				];
+			} else {
+				labels = [
+					this.originalInput.getName(),
+					this.modifiedInput.getName()
+				];
 			}
 
-			return localize('sideBySideLabels', "{0} ↔ {1}", this.originalInput.getName(), this.modifiedInput.getName());
+			return localize('sideBySideLabels', "{0} ↔ {1}", ...labels);
 		}
 
 		return this.name;
